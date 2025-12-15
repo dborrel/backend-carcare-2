@@ -71,6 +71,10 @@ app.use("/estadisticas", estadisticasRoutes);
 import busquedaRoutes from "./routes/busquedaRoutes.js";
 app.use("/busqueda", busquedaRoutes);
 
+// Rutas de parkings
+import parkingRoutes from "./routes/parkingRoutes.js";
+app.use("/parking", parkingRoutes);
+
 // Rutas de suscripciones
 import suscripcionRoutes from "./routes/suscripcionRoutes.js";
 app.use("/suscripcion", suscripcionRoutes);

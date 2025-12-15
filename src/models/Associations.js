@@ -8,6 +8,7 @@ import Logro from "./Logro.js";
 import UsuarioLogro from "./UsuarioLogro.js";
 import Incidencia from "./Incidencia.js";
 import Revision from "./Revision.js";
+import Parking from "./Parking.js";
 
 // Relación N:M (muchos a muchos) entre Usuario y Vehiculo
 Usuario.belongsToMany(Vehiculo, { through: "UsuarioVehiculo" });
@@ -91,4 +92,8 @@ Revision.belongsTo(Usuario, { foreignKey: "usuarioId" });
 Vehiculo.hasMany(Revision, { foreignKey: "vehiculoId" });
 Revision.belongsTo(Vehiculo, { foreignKey: "vehiculoId" });
 
-export { Usuario, Vehiculo, Reserva, Invitacion, Repostaje, Incidencia, Viaje, Revision, Logro, UsuarioLogro };
+// Relación Usuario-Parking (1:N)
+Usuario.hasMany(Parking, { foreignKey: "usuarioId" });
+Parking.belongsTo(Usuario, { foreignKey: "usuarioId" });
+
+export { Usuario, Vehiculo, Reserva, Invitacion, Repostaje, Incidencia, Viaje, Revision, Logro, UsuarioLogro, Parking };
