@@ -104,8 +104,8 @@ describe('Reserva - Tests de Integración', () => {
         .post('/api/reservas') // Cambiado
         .send({
           tipo: 'TRABAJO',
-          fechaInicio: '2025-11-10',
-          fechaFinal: '2025-11-11',
+          fechaInicio: '2026-11-10',
+          fechaFinal: '2026-11-11',
           vehiculoId: 1,
           horaInicio: '08:00:00',
           horaFin: '18:00:00'
@@ -123,8 +123,8 @@ describe('Reserva - Tests de Integración', () => {
         .set('Authorization', `Bearer ${token}`)
         .send({
           tipo: 'TRABAJO',
-          fechaInicio: '2025-11-11',
-          fechaFinal: '2025-11-10',
+          fechaInicio: '2026-11-11',
+          fechaFinal: '2026-11-10',
           vehiculoId: vehiculo.id,
           horaInicio: '08:00:00',
           horaFin: '18:00:00'
@@ -144,8 +144,8 @@ describe('Reserva - Tests de Integración', () => {
         .set('Authorization', `Bearer ${token}`)
         .send({
           tipo: 'TRABAJO',
-          fechaInicio: '2025-12-01',
-          fechaFinal: '2025-12-01',
+          fechaInicio: '2026-12-01',
+          fechaFinal: '2026-12-01',
           vehiculoId: vehiculo.id,
           horaInicio: '09:00:00',
           horaFin: '12:00:00'
@@ -158,8 +158,8 @@ describe('Reserva - Tests de Integración', () => {
         .set('Authorization', `Bearer ${token}`)
         .send({
           tipo: 'PERSONAL',
-          fechaInicio: '2025-12-01',
-          fechaFinal: '2025-12-01',
+          fechaInicio: '2026-12-01',
+          fechaFinal: '2026-12-01',
           vehiculoId: vehiculo.id,
           horaInicio: '11:00:00',
           horaFin: '13:00:00'
@@ -206,8 +206,8 @@ describe('Reserva - Tests de Integración', () => {
         .set('Authorization', `Bearer ${token}`)
         .send({
           tipo: 'TRABAJO',
-          fechaInicio: '2025-12-10',
-          fechaFinal: '2025-12-10',
+          fechaInicio: '2026-12-10',
+          fechaFinal: '2026-12-10',
           vehiculoId: vehiculo.id,
           horaInicio: '08:00:00',
           horaFin: '09:00:00'
@@ -240,8 +240,8 @@ describe('Reserva - Tests de Integración', () => {
         .set('Authorization', `Bearer ${token}`)
         .send({
           tipo: 'TRABAJO',
-          fechaInicio: '2025-12-20',
-          fechaFinal: '2025-12-20',
+          fechaInicio: '2026-12-20',
+          fechaFinal: '2026-12-20',
           vehiculoId: vehiculo.id,
           horaInicio: '08:00:00',
           horaFin: '10:00:00'
@@ -273,8 +273,8 @@ describe('Reserva - Tests de Integración', () => {
         .set('Authorization', `Bearer ${ownerToken}`)
         .send({
           tipo: 'TRABAJO',
-          fechaInicio: '2025-12-22',
-          fechaFinal: '2025-12-22',
+          fechaInicio: '2026-12-22',
+          fechaFinal: '2026-12-22',
           vehiculoId: vehiculo.id,
           horaInicio: '08:00:00',
           horaFin: '10:00:00'
@@ -300,8 +300,8 @@ describe('Reserva - Tests de Integración', () => {
         .set('Authorization', `Bearer ${token}`)
         .send({
           tipo: 'TRABAJO',
-          fechaInicio: '2025-12-25',
-          fechaFinal: '2025-12-25',
+          fechaInicio: '2026-12-25',
+          fechaFinal: '2026-12-25',
           vehiculoId: vehiculo.id,
           horaInicio: '08:00:00',
           horaFin: '10:00:00'
@@ -327,8 +327,8 @@ describe('Reserva - Tests de Integración', () => {
         .set('Authorization', `Bearer ${ownerToken}`)
         .send({
           tipo: 'TRABAJO',
-          fechaInicio: '2025-12-27',
-          fechaFinal: '2025-12-27',
+          fechaInicio: '2026-12-27',
+          fechaFinal: '2026-12-27',
           vehiculoId: vehiculo.id,
           horaInicio: '08:00:00',
           horaFin: '10:00:00'

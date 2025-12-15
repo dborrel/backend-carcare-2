@@ -3,11 +3,25 @@ import cors from "cors";
 import morgan from "morgan";
 import routes from "./routes/index.js";
 import "./models/Associations.js";
+import path from 'path';
+import { fileURLToPath } from 'url';
 const app = express();
+
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
 
 app.use(cors());
 app.use(express.json());
 app.use(morgan("dev"));
+
+// Configuración para subir archivos
+app.use(express.json({ limit: '20mb' }));
+app.use(express.urlencoded({ limit: '20mb', extended: true }));
+
+// Configuración para usar la carpeta 'uploads'
+app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
+
+console.log('📁 Sirviendo archivos estáticos desde:', path.join(__dirname, 'uploads'));
 
 app.get("/", (req, res) => {
   res.status(200).json({ message: "API CarCare backend funcionando" });
@@ -60,5 +74,9 @@ app.use("/busqueda", busquedaRoutes);
 // Rutas de parkings
 import parkingRoutes from "./routes/parkingRoutes.js";
 app.use("/parking", parkingRoutes);
+
+// Rutas de suscripciones
+import suscripcionRoutes from "./routes/suscripcionRoutes.js";
+app.use("/suscripcion", suscripcionRoutes);
 
 export default app;

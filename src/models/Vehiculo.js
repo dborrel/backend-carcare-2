@@ -51,8 +51,16 @@ const Vehiculo = sequelize.define("Vehiculo", {
   },
   estado: {
     type: DataTypes.ENUM("Activo", "Inactivo", "Mantenimiento"), // Estado del vehículo
-    allowNull: false,
-    defaultValue: "Activo",
+    defaultValue: 'Inactivo', // Estado inicial
+    allowNull: false
+  },
+  usuarioActivoId: {
+      type: DataTypes.INTEGER, // Debe coincidir con el tipo de 'Usuario.id'
+      allowNull: true,         // Permite NULL si el vehículo no está 'activo'
+      references: {
+          model: 'Usuarios', // Nombre de la tabla referenciada
+          key: 'id'
+      }
   },
   tipo: {
     type: DataTypes.ENUM("Coche", "Moto", "Furgoneta", "Camión"), // Tipo de vehículo

@@ -61,33 +61,37 @@ export const registrarVehiculo = async (req, res) => {
     }
 
     // Buscar al usuario que registra el vehículo
-    const usuario = await Usuario.findByPk(usuarioId);
-    if (!usuario) {
-      return res.status(404).json({ error: "Usuario no encontrado." });
-    }
+   const usuario = await Usuario.findByPk(usuarioId);
+    if (!usuario) {
+      return res.status(404).json({ error: "Usuario no encontrado." });
+    }
 
-    // Crear el nuevo vehículo
-    const nuevoVehiculo = await Vehiculo.create({
-      nombre,
-      matricula,
-      modelo,
-      fabricante,
-      antiguedad,
-      tipo_combustible,
-      litros_combustible,
-      consumo_medio,
-      ubicacion_actual,
-      estado,
-      tipo,
-      propietarioId: usuarioId
-    });
+    // Crear el nuevo vehículo
+    const nuevoVehiculo = await Vehiculo.create({
+      nombre,
+      matricula,
+      modelo,
+      fabricante,
+      antiguedad,
+      tipo_combustible,
+      litros_combustible,
+      consumo_medio,
+      ubicacion_actual,
+      // 🚨 CORRECCIÓN CLAVE 1: Forzar el estado inicial a "Inactivo"
+      estado: 'Inactivo', 
+      tipo,
+      propietarioId: usuarioId,
+      // 🚨 CORRECCIÓN CLAVE 2: Asegurar que NO haya un usuario activo al crearse
+      usuarioActivoId: null 
+    });
 
-    await usuario.addVehiculo(nuevoVehiculo);
+    // 🚨 CORRECCIÓN CLAVE 3: Esta línea es crucial y ya la tienes, asegura la vinculación
+    await usuario.addVehiculo(nuevoVehiculo);
 
-    res.status(200).json({ message: "Vehículo registrado exitosamente.", vehiculo: nuevoVehiculo });
-  } catch (error) {
-    res.status(500).json({ error: "Error al registrar el vehículo.", detalles: error.message });
-  }
+    res.status(200).json({ message: "Vehículo registrado exitosamente.", vehiculo: nuevoVehiculo });
+  } catch (error) {
+    res.status(500).json({ error: "Error al registrar el vehículo.", detalles: error.message });
+  }
 };
 
 // Función para obtener los vehículos asociados a un usuario
@@ -283,4 +287,93 @@ export const eliminarUsuarioDeVehiculo = async (req, res) => {
   } catch (error) {
     res.status(500).json({ error: "Error al eliminar usuario del vehículo.", detalles: error.message });
   }
+};
+
+// Función para cambiar el estado de un vehículo
+export const actualizarEstadoVehiculo = async (req, res) => {
+    try {
+        const vehiculoId = req.params.vehiculoId;
+        // El ID del usuario que hace la petición viene del middleware de autenticación
+        const usuarioId = req.usuario.id; 
+        const { estado } = req.body; 
+        
+        // --- 1. NORMALIZACIÓN Y VALIDACIÓN ---
+        // Normalizamos el estado para que siempre tenga Mayúscula Inicial
+        const nuevoEstadoNormalizado = estado.charAt(0).toUpperCase() + estado.slice(1).toLowerCase();
+
+        const estadosValidos = ["Activo", "Inactivo", "Mantenimiento"];
+        if (!estadosValidos.includes(nuevoEstadoNormalizado)) {
+            return res.status(400).json({ error: "Estado no válido. Debe ser Activo, Inactivo o Mantenimiento." });
+        }
+
+        // 2. Obtener vehículo y usuarios vinculados
+        const vehiculo = await Vehiculo.findByPk(vehiculoId, {
+            attributes: ['id', 'estado', 'usuarioActivoId'], 
+            include: [{ 
+                model: Usuario, 
+                attributes: ['id'], 
+                through: { attributes: [] } 
+            }]
+        });
+
+        if (!vehiculo) {
+            return res.status(404).json({ error: "Vehículo no encontrado." });
+        }
+
+        // 3. Verificar vinculación
+        // Aseguramos que usuarioId sea del mismo tipo que u.id antes de comparar
+        const usuarioIdStr = String(usuarioId);
+        const vinculado = vehiculo.Usuarios.some(u => String(u.id) === usuarioIdStr);
+        if (!vinculado) {
+          console.log(`[DEBUG] Vehiculo ID: ${vehiculoId}`);
+          console.log(`[DEBUG] Estado Actual: ${vehiculo.estado}`);
+          console.log(`[DEBUG] Usuario Activo ID (DB): ${vehiculo.usuarioActivoId}`);
+          console.log(`[DEBUG] Usuario Actual (Petición): ${usuarioIdStr}`);
+          return res.status(403).json({ error: "No tienes permisos para cambiar el estado de este vehículo." });
+        }
+        
+        // --- 4. REGLA DE EXCLUSIVIDAD (Con estado normalizado) ---
+        // Si el estado actual es 'Activo' y NO es el usuario actual quien lo activó, se deniega.
+        // Aseguramos que usuarioActivoId también se convierta a String para la comparación
+        if (vehiculo.estado === 'Activo' && String(vehiculo.usuarioActivoId) !== usuarioIdStr) {
+          console.log(`[DEBUG] Vehiculo ID: ${vehiculoId}`);
+          console.log(`[DEBUG] Estado Actual: ${vehiculo.estado}`);
+          console.log(`[DEBUG] Usuario Activo ID (DB): ${vehiculo.usuarioActivoId}`);
+          console.log(`[DEBUG] Usuario Actual (Petición): ${usuarioIdStr}`);
+            return res.status(403).json({ error: "El vehículo está activo y solo puede ser liberado por el usuario que lo activó." });
+        }
+
+        // 5. Aplicar cambios
+        if (nuevoEstadoNormalizado === 'Activo') {
+            // Se activa: se bloquea con el ID del usuario actual
+            vehiculo.estado = 'Activo';
+            vehiculo.usuarioActivoId = usuarioId; // Aquí usamos el ID numérico
+        } else {
+            // Se desactiva/mantenimiento: se libera el bloqueo
+            vehiculo.estado = nuevoEstadoNormalizado;
+            vehiculo.usuarioActivoId = null; // Liberamos el bloqueo
+        }
+
+        const vehiculoActualizado = await vehiculo.save();
+
+        // --- 6. Devolver Respuesta (Corregido el formato para el móvil) ---
+        // Al devolver el objeto 'vehiculo' directamente después de save() (paso 5), 
+        // Sequelize NO siempre incluye las asociaciones (Usuarios). 
+        // Para asegurar que el cliente reciba la información que necesita, creamos un objeto limpio:
+        res.status(200).json({ 
+            message: `Estado del vehículo actualizado a '${nuevoEstadoNormalizado}' correctamente.`,
+            vehiculo: {
+                id: vehiculoActualizado.id,
+                estado: vehiculoActualizado.estado,
+                usuarioActivoId: vehiculoActualizado.usuarioActivoId, // ESTO AHORA ES '6' o 'null'
+                // Puedes añadir Usuarios aquí si es necesario, pero para el estado, esto es suficiente.
+            }
+        });
+    } catch (error) {
+        console.error('ERROR al actualizar el estado del vehículo:', error);
+        res.status(500).json({ 
+            error: "Error al actualizar el estado del vehículo.", 
+            detalles: error.message 
+        });
+    }
 };

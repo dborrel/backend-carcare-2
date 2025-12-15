@@ -2,7 +2,8 @@ import "../models/index.js";
 import express from "express";
 import { verificarToken } from "../middlewares/authMiddleware.js";
 import { obtenerVehiculosUsuario, obtenerUbicacionVehiculo, actualizarUbicacionVehiculo, 
-    registrarVehiculo, eliminarVehiculo, editarVehiculo, eliminarUsuarioDeVehiculo } from "../controllers/vehiculoController.js";
+    registrarVehiculo, eliminarVehiculo, editarVehiculo, eliminarUsuarioDeVehiculo, 
+    actualizarEstadoVehiculo } from "../controllers/vehiculoController.js";
 
 const router = express.Router();
 
@@ -13,4 +14,5 @@ router.put('/actualizarUbicacion/:vehiculoId', verificarToken, actualizarUbicaci
 router.delete('/eliminar/:vehiculoId', verificarToken, eliminarVehiculo);
 router.put('/editar/:vehiculoId', verificarToken, editarVehiculo);
 router.post('/eliminarUsuario/:vehiculoId', verificarToken, eliminarUsuarioDeVehiculo);
+router.patch('/:vehiculoId/estado', verificarToken, actualizarEstadoVehiculo);
 export default router;
